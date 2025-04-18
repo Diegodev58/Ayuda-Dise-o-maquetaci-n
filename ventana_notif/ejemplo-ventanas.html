@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejemplo de Ventana Emergente</title>
+    <style>
+        /* Estilos base */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        /* Botón de demostración */
+        .demo-btn {
+            padding: 12px 24px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .demo-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        /* Fondo oscuro de la ventana */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* Contenedor de la ventana emergente */
+        .modal-container {
+            background-color: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: modalFadeIn 0.3s;
+        }
+        
+        /* Cabecera de la ventana */
+        .modal-header {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-title {
+            margin: 0;
+            font-size: 1.3rem;
+            color: #333;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #777;
+            padding: 0;
+            line-height: 1;
+        }
+        
+        /* Cuerpo de la ventana */
+        .modal-body {
+            padding: 20px;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        /* Pie de la ventana */
+        .modal-footer {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            border-top: 1px solid #eee;
+            background-color: #f8f9fa;
+        }
+        
+        /* Botones de acción */
+        .modal-btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .modal-btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .modal-btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .modal-btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .modal-btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        /* Iconos */
+        .modal-icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        
+        /* Animaciones */
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Variantes de ventana emergente */
+        .modal-success .modal-header {
+            background-color: #d4edda;
+            border-bottom-color: #c3e6cb;
+        }
+        
+        .modal-error .modal-header {
+            background-color: #f8d7da;
+            border-bottom-color: #f5c6cb;
+        }
+        
+        .modal-warning .modal-header {
+            background-color: #fff3cd;
+            border-bottom-color: #ffeeba;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ejemplo de Ventana Emergente</h1>
+    <p>Haz clic en los botones para ver diferentes tipos de notificaciones:</p>
+    
+    <div style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;">
+        <button class="demo-btn" onclick="mostrarModal('default')">Mostrar Modal Normal</button>
+        <button class="demo-btn" onclick="mostrarModal('success')">Mostrar Éxito</button>
+        <button class="demo-btn" onclick="mostrarModal('error')">Mostrar Error</button>
+        <button class="demo-btn" onclick="mostrarModal('warning')">Mostrar Advertencia</button>
+    </div>
+    
+    <!-- Ventana emergente base (oculta inicialmente) -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-container" id="modalContainer">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Título del Modal</h3>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                Este es el contenido del mensaje emergente. Puedes personalizarlo según tus necesidades.
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-secondary" id="modalCancel">Cancelar</button>
+                <button class="modal-btn modal-btn-primary" id="modalConfirm">Aceptar</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Elementos del DOM
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalContainer = document.getElementById('modalContainer');
+        const modalClose = document.getElementById('modalClose');
+        const modalCancel = document.getElementById('modalCancel');
+        const modalConfirm = document.getElementById('modalConfirm');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        
+        // Mostrar modal con diferentes tipos
+        function mostrarModal(tipo) {
+            // Resetear clases
+            modalContainer.className = 'modal-container';
+            
+            // Configurar según el tipo
+            switch(tipo) {
+                case 'success':
+                    modalContainer.classList.add('modal-success');
+                    modalTitle.innerHTML = '<span class="modal-icon">✓</span> Operación Exitosa';
+                    modalBody.textContent = 'Los cambios se han guardado correctamente. Todo está en orden.';
+                    break;
+                    
+                case 'error':
+                    modalContainer.classList.add('modal-error');
+                    modalTitle.innerHTML = '<span class="modal-icon">⚠</span> Error Detectado';
+                    modalBody.textContent = 'Ha ocurrido un problema al procesar tu solicitud. Por favor, inténtalo nuevamente.';
+                    break;
+                    
+                case 'warning':
+                    modalContainer.classList.add('modal-warning');
+                    modalTitle.innerHTML = '<span class="modal-icon">!</span> Advertencia Importante';
+                    modalBody.textContent = 'Esta acción no se puede deshacer. ¿Estás seguro de que deseas continuar?';
+                    break;
+                    
+                default:
+                    modalTitle.textContent = 'Notificación Importante';
+                    modalBody.textContent = 'Este es un mensaje de notificación estándar. Por favor, revisa la información.';
+            }
+            
+            // Mostrar el modal
+            modalOverlay.style.display = 'flex';
+        }
+        
+        // Cerrar modal al hacer clic en la X
+        modalClose.addEventListener('click', cerrarModal);
+        
+        // Cerrar modal al hacer clic en Cancelar
+        modalCancel.addEventListener('click', cerrarModal);
+        
+        // Acción al hacer clic en Aceptar
+        modalConfirm.addEventListener('click', function() {
+            alert('Has aceptado la acción');
+            cerrarModal();
+        });
+        
+        // Cerrar modal al hacer clic fuera del contenido
+        modalOverlay.addEventListener('click', function(e) {
+            if (e.target === modalOverlay) {
+                cerrarModal();
+            }
+        });
+        
+        // Función para cerrar el modal
+        function cerrarModal() {
+            modalOverlay.style.display = 'none';
+        }
+        
+        // También se puede cerrar con la tecla ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modalOverlay.style.display === 'flex') {
+                cerrarModal();
+            }
+        });
+    </script>
+</body>
+</html>
